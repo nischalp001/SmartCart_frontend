@@ -31,7 +31,7 @@ $(function () {
     const video = document.getElementById('video');
     let canvas, ctx;
     let isProcessingFrame = false;
-    const apiEndpoint = "https://smartcart-backend-3yr2.onrender.com";
+    const apiEndpoint = "https://smartcart-backend-3yr2.onrender.com/predict";
     
     async function initializeCamera() {
         try {
