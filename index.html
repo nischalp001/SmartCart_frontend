@@ -1,0 +1,59 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-shopping-cart"></i>
+            <span>किराना Cart</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Updated video section without initialization message -->
+        <div class="video-section">
+            <div class="camera-overlay">
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
+            </div>
+            <video id="video" autoplay muted></video>
+        </div>
+
+        <div class="cart-section">
+            <div class="cart-header">
+                <h2><i class="fas fa-shopping-basket"></i> Your Cart</h2>
+                <div class="scan-status">
+                    <span class="pulse"></span>
+                    Scanning items...
+                </div>
+            </div>
+            
+            <div class="cart-items" id="detections">
+                <!-- Dynamically filled with detected items -->
+            </div>
+
+            <div class="cart-footer">
+                <button class="checkout-button" id="checkoutButton">
+                    <i class="fas fa-cash-register"></i>
+                    Check Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.0/async.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/inferencejs"></script>
+    <script src="main.js"></script>
+</body>
+</html>
