@@ -41,7 +41,8 @@
     "Patanjali Dish Soap": 35,
     "Colin": 175,
     "Thai Inhaler": 315,
-    "Vaseline": 205
+    "Vaseline": 205,
+    "Harpic": 180,
   };
 
   // ==== State ====
