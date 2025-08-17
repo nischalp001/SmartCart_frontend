@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Smart Cart – Frontend (rewritten) */
 
 (function ($) {
@@ -98,6 +99,64 @@
     } catch (e) {
       console.error(e);
       alert("Initialization error: " + e.message);
+=======
+$(function () {
+    // Remove the InferenceEngine initialization since we're using HTTP API now
+    let detectedItems = {};
+    let detectedItemPositions = {};
+    let checkoutClicked = false;
+    let prevTime = null;
+    let pastFrameTimes = [];
+    let detectionHistory = [];
+    const historyLength = 10;
+    const confidenceThreshold = 0.5;
+    const minDetectionFrames = 3;
+    const productColors = {
+        "WaiWai": "#FFD700",
+        "Ariel": "#2ECC40",
+        "Coke": "#FF4136",
+        "Dettol": "#0074D9",
+        "Hajmola Rasilo Candy": "#40100e",
+        "Ariel": "#25852f",
+        "Parachute Coconut Oil": "#0b429c",
+        "Colgate": "#9c0b4c",
+        "Horlicks": "#0b9c6e",
+        "Ketchup": "#800311",
+        "KitKat": "#b0515c",
+        "Oreo": "#0b2d54",
+        "Patanjali Dish Soap": "#23b067",
+        "Colin": "#4c6ad4",
+        "Thai Inhaler": "#128c2d",
+        "Vaseline": "#d2d918"
+    };
+    
+    const video = document.getElementById('video');
+    let canvas, ctx;
+    let isProcessingFrame = false;
+    const apiEndpoint = "https://smartcart-backend-3yr2.onrender.com/predict";
+    
+    async function initializeCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            });
+            video.srcObject = stream;
+            return new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    video.play();
+                    resolve(true);
+                };
+            });
+        } catch (error) {
+            console.error('Camera initialization error:', error);
+            handleCameraError(error);
+            return false;
+        }
+>>>>>>> ab1b448715f24fa55127b494e980e39ef65dfac3
     }
 
     // events
@@ -642,7 +701,159 @@
         $ty.find("#returnToShopping").on("click", () => window.location.reload());
       });
     });
+<<<<<<< HEAD
   }
 
 })(jQuery);
 
+=======
+    
+    function createStatusIndicator() {
+        const statusDiv = $('<div id="detectionStatus" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; z-index: 1000;">Initializing...</div>');
+        $(".video-section").append(statusDiv);
+        return statusDiv;
+    }
+    
+    function createInstructions() {
+        const instructions = $(`
+            <div id="instructions" style="
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                text-align: center;
+                font-size: 14px;
+                z-index: 90;
+                max-width: 80%;
+            ">
+                <p style="margin: 0 0 5px 0;"><b>How to use:</b> Point camera at products to detect them</p>
+                <p style="margin: 0;">Item locations shown on left sidebar with directional indicators</p>
+                <button id="hideInstructions" style="
+                    background: #555;
+                    border: none;
+                    color: white;
+                    padding: 4px 10px;
+                    border-radius: 3px;
+                    margin-top: 8px;
+                    cursor: pointer;
+                ">Got it</button>
+            </div>
+        `);
+        
+        $(".video-section").append(instructions);
+        
+        $("#hideInstructions").click(function() {
+            $(this).parent().fadeOut();
+        });
+    }
+    
+    // Add styling for the receipt
+    function addReceiptStyles() {
+        const receiptStyles = $(`
+            <style>
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    #receiptModal, #receiptModal * {
+                        visibility: visible;
+                    }
+                    #receiptModal {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                    }
+                    #receiptModal .receipt-actions {
+                        display: none !important;
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                #receiptModal .receipt-content {
+                    animation: fadeIn 0.5s ease-out;
+                }
+                
+                #qrCodeScreen {
+                    animation: fadeIn 0.5s ease-out;
+                }
+            </style>
+        `);
+        
+        $("head").append(receiptStyles);
+    }
+    
+    // Test connection to API server
+    async function testApiConnection() {
+        try {
+            const response = await fetch(apiEndpoint.replace('/predict', '/'));
+            if (!response.ok) {
+                throw new Error(`API server not responding: ${response.status}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('API connection test failed:', error);
+            return false;
+        }
+    }
+    
+    async function initialize() {
+        const statusIndicator = createStatusIndicator();
+        
+        // Add receipt styles
+        addReceiptStyles();
+        
+        try {
+            statusIndicator.text("Initializing camera...");
+            const cameraInitialized = await initializeCamera();
+            
+            if (!cameraInitialized) {
+                statusIndicator.css("background", "rgba(255,0,0,0.7)").text("Camera initialization failed");
+                return;
+            }
+            
+            statusIndicator.text("Connecting to detection server...");
+            const apiConnected = await testApiConnection();
+            
+            if (!apiConnected) {
+                statusIndicator.css("background", "rgba(255,0,0,0.7)")
+                    .text("Cannot connect to detection server at " + apiEndpoint);
+                return;
+            }
+            
+            statusIndicator.text("Starting detection...");
+            resizeCanvas();
+            
+            createInstructions();
+            
+            setTimeout(() => {
+                statusIndicator.css("background", "rgba(0,128,0,0.7)").text("Ready! Point camera at products");
+                setTimeout(() => {
+                    statusIndicator.fadeOut(1000);
+                }, 3000);
+                captureAndSendFrame();
+            }, 1000);
+        } catch (error) {
+            console.error('Initialization error:', error);
+            statusIndicator.css("background", "rgba(255,0,0,0.7)").text("Error: " + error.message);
+        }
+    }
+    
+    initialize().catch(error => {
+        console.error('Global initialization error:', error);
+        alert("Failed to initialize application: " + error.message);
+    });
+    
+    $(window).resize(function() {
+        resizeCanvas();
+    });
+});
+>>>>>>> ab1b448715f24fa55127b494e980e39ef65dfac3
